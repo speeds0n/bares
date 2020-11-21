@@ -1,0 +1,9 @@
+A tokenização será feita por meio de uma string que recebe a expressão, exemplo: 20*4 + 3
+	Nessa Tokenizão deveram ser ignorados espaços e tabs.
+	Para identificar um número, será usado um laço com a estrutura: enquanto for um número entre (0 e 9) adicione esse caractere a uma string.
+	Para identificar uma operação, se o caractere for uma operação valida salve-o
+	Números aceitos, tanto na entrada(número digitado), quanto na saida(resultado da operação) entre -32.768 a 32.768. USAR O TIPO SHORT
+	As operações validas são: (+)adição, (-)subtração, (*)multiplicação, (/)divisão, (%)resto da divisão, (^)potenciação.
+	Simbolos validos () parenteses
+	Um número negativo só é valido se o espaço estiver na posição anterior ao número
+	Exemplo de expressões com o sinal de menos: -2+3, 2-3, 2--3
