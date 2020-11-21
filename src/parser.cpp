@@ -74,7 +74,6 @@ bool Parser::accept( terminal_symbol_t c_ )
     {
 
 		if( lexer( *m_it_curr_symb ) == terminal_symbol_t::TS_MINUS && lexer( *m_it_curr_symb+1 ) == terminal_symbol_t::TS_MINUS  ) {
-			std::cout << "teste\n";
 			m_it_curr_symb++;
 		}
         next_symbol();
@@ -213,10 +212,7 @@ bool Parser::term()
         std::string token_str;
 		int aux{0};
         std::copy( begin_token, m_it_curr_symb, std::back_inserter( token_str ) );
-		std::cout << "token: " << token_str << std::endl;
-		std::cout << "cSymb: " << *m_it_curr_symb << std::endl;
-		std::cout << aux << std::endl;
-		std::cout << 1 % 2 << std::endl;
+
 		for(int i{0}; i < token_str.size(); i++){
 			if(token_str[i] == '-'){
 				aux++;

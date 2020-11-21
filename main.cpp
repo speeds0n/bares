@@ -1,5 +1,7 @@
 #include <iostream>
 #include <string>
+#include <iomanip>
+#include <vector>
 
 #include "lib/bares.h"
 #include "lib/parser.h"
@@ -45,15 +47,23 @@ int main(){
 
 	getline(std::cin, expression);
 
-	r.setInput(expression);
-	r.read(expression);
 	
 	auto result = my_parser.parse(expression);
 	if(result.type != Parser::ResultType::OK){
 		print_error_msg( result, expression);
 	}else{
-		std::cout << "(main) result: " << expression << std::endl;
-		std::cout << "(main) Passou" << std::endl;
+		// IMPLEMENTAR AQUI PRE FIXO POS FIXO
+	}
+
+	auto lista = my_parser.get_tokens();
+	std::cout << ">>> Token: {";
+	std::copy( lista.begin(), lista.end(), std::ostream_iterator< Token >(std::cout, " ") );
+	std::cout << "}\n";
+
+	int g{0};
+	while(g < lista.size()){
+		std::cout << lista[g].value << std::endl;
+		g++;
 	}
 
 	return 0;
