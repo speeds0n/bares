@@ -1,3 +1,9 @@
+/*!
+ * \file parser.h
+ * \author Selan
+ * \date November, 2020
+ */
+
 #ifndef _PARSER_H_
 #define _PARSER_H_
 
@@ -47,7 +53,9 @@ class Parser
                     EXTRANEOUS_SYMBOL,
                     INTEGER_OUT_OF_RANGE,
 					INCOMPLETE_EXPRE,
-					MISS_CLOSE_SCOPE
+					MISS_CLOSE_SCOPE,
+					DIV_BY_ZERO,
+					OUT_RANGE
             };
 
             //=== Members (public).

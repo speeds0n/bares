@@ -1,3 +1,9 @@
+/*!
+ * \file token.h
+ * \author Selan
+ * \date November, 2020
+ */
+
 #ifndef _TOKEN_H_
 #define _TOKEN_H_
 

@@ -1,3 +1,9 @@
+/*!
+ * \file parser.cpp
+ * \author Selan
+ * \date November, 2020
+ */
+
 #include "../lib/parser.h"
 #include <iterator>
 #include <algorithm>
@@ -72,6 +78,20 @@ bool Parser::accept( terminal_symbol_t c_ )
     if ( not end_input() and
              lexer( *m_it_curr_symb ) == c_  )
     {
+		// Verificaçao de / e %
+		if(lexer(*m_it_curr_symb) == terminal_symbol_t::TS_DIV ||
+			lexer(*m_it_curr_symb) == terminal_symbol_t::TS_PEC)
+		{
+			m_it_curr_symb++;
+			skip_ws();
+			if(lexer(*m_it_curr_symb) == terminal_symbol_t::TS_ZERO)
+			{
+				m_result = ResultType( ResultType::DIV_BY_ZERO,
+                        std::distance( m_expr.begin(), m_it_curr_symb ) );
+				return false;
+			}
+			m_it_curr_symb--;
+		}
 
 		if( lexer( *m_it_curr_symb ) == terminal_symbol_t::TS_MINUS && lexer( *m_it_curr_symb+1 ) == terminal_symbol_t::TS_MINUS  ) {
 			m_it_curr_symb++;
@@ -138,22 +158,22 @@ bool Parser::expression()
         }
 		else if ( accept( Parser::terminal_symbol_t::TS_MULT ) )
 		{
-
+            // Stores the "*" token in the list.
 			m_tk_list.emplace_back( Token( "*", Token::token_t::OPERATOR ) );
 		}
 		else if ( accept( Parser::terminal_symbol_t::TS_DIV ) )
 		{
-
+            // Stores the "/" token in the list.
 			m_tk_list.emplace_back( Token( "/", Token::token_t::OPERATOR ) );
 		}
 		else if ( accept( Parser::terminal_symbol_t::TS_POW ) )
 		{
-
+            // Stores the "^" token in the list.
 			m_tk_list.emplace_back( Token("^", Token::token_t::OPERATOR ) );
 		}
 		else if ( accept( Parser::terminal_symbol_t::TS_PEC ) )
 		{
-
+            // Stores the "%" token in the list.
 			m_tk_list.emplace_back( Token("%", Token::token_t::OPERATOR ) );
 		}
 		else break;
@@ -162,8 +182,15 @@ bool Parser::expression()
         if ( not term() and m_result.type == ResultType::ILL_FORMED_INTEGER )
         {
             // Make the error more specific.
-            m_result.type = ResultType::MISSING_TERM;
+			m_result = ResultType( ResultType::MISSING_TERM,
+					std::distance(m_expr.begin(), m_expr.end() ) );
+//            m_result.type = ResultType::MISSING_TERM;
         }
+//		if ( not term() and m_result.type == ResultType::OUT_RANGE )
+//        {
+//            // Make the error more specific.
+//            m_result.type = ResultType::OUT_RANGE;
+//        }
     }
 
     return m_result.type == ResultType::OK;
@@ -190,6 +217,7 @@ bool Parser::term()
 	{
 		m_tk_list.emplace_back( Token("(", Token::token_t::OPEN_SCOPE ) );
 		skip_ws();
+		//Verifica os parenteses
 		if( end_input() )
 		{
 			m_result = ResultType( ResultType::INCOMPLETE_EXPRE,
@@ -213,11 +241,13 @@ bool Parser::term()
 		int aux{0};
         std::copy( begin_token, m_it_curr_symb, std::back_inserter( token_str ) );
 
+		// Conta quantos '-' tem na expressão
 		for(int i{0}; i < token_str.size(); i++){
 			if(token_str[i] == '-'){
 				aux++;
 			}
 		}
+		// Substitue o sinais de '-' por espaços, pois o programa trata espaços e tabs
 		if(aux % 2 == 0){
 			for(int i{0}; i < token_str.size(); i++){
 				if(token_str[i] == '-')
@@ -366,7 +396,7 @@ Parser::ResultType  Parser::parse( std::string e_ )
     if ( end_input() ) // Premature end?
     {
         // Input has finished before we even started to parse...
-        m_result =  ResultType( ResultType::UNEXPECTED_END_OF_EXPRESSION,
+        m_result =  ResultType( ResultType::INCOMPLETE_EXPRE,
                 std::distance( m_expr.begin(), m_it_curr_symb ) );
     }
     else

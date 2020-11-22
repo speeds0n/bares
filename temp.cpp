@@ -1,12 +1,14 @@
 #include <iostream>
-#include <string>
-
+#include <stdexcept>
 int main(){
 
-	std::string st;
+	int a{0};
+	std::cin >> a;
 
-	std::cin >> st;
-	std::cout << st << std::endl;
+	if(a == 1){
+		throw std::runtime_error("error error error");
+		std::cout << "teste" << std::endl;
+	}
 
 	return 0;
 }

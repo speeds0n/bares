@@ -1,7 +1,16 @@
+/*!
+ * \file bares.cpp
+ * \author Edson Cassiano
+ * \date November, 2020
+ */
+
 #include <iostream>
 #include <string>
 #include <vector>
+#include <stack>
+#include <cmath>
 
+#include "../lib/parser.h"
 #include "../lib/bares.h"
 
 Stack::Stack(){
@@ -12,11 +21,9 @@ Stack::Stack(){
 void Stack::push(std::string expr){
 	m_expression.push_back(expr);
 	m_top++;
-	//TODO implementar verificação se a pilha está cheia
 }
 
 std::string Stack::pop(){
-	//TODO implementar a verficação se a pilha está vazia
 	std::string aux;
 	aux = m_expression[m_top];
 	m_top--;
@@ -36,34 +43,147 @@ bool Stack::isFull(){
 	return m_top == 500;
 }
 
-Bares::Bares(std::string value){
-	m_input = value;
+void Bares::setTkList(std::vector<Token> expr){
+	m_tk_list = expr;
 }
 
-int Bares::inputSize(){
-	return m_input.size();
+bool Bares::isNumber(Token::token_t type){
+	return type == Token::token_t::OPERAND;
 }
 
-void Bares::setInput(std::string value){
-	m_input = value;
+bool Bares::isOperator(Token::token_t type){
+	return type == Token::token_t::OPERATOR;
 }
 
-void Bares::read(){
+bool Bares::openScope(Token::token_t type){
+	return type == Token::token_t::OPEN_SCOPE;
+}
 
-	int i{0};
-	std::string expr;
-	std::string test;
+bool Bares::closeScope(Token::token_t type){
+	return type == Token::token_t::CLOSE_SCOPE;
+}
 
-	expr = getInput();
+int Bares::getPrecedence(std::string op){
 
-	while(i < inputSize()){
+	int index{0};
+	while(index < op.size()){
 
-		if(expr[i] >= '0' && expr[i] <= '9'){
-			test.push_back(expr[i]);
-		}else{
-			std::cout << test << std::endl;
-			test.clear();
+		if(op[index] != ' '){
+			break;
 		}
-		i++;
+		index++;
 	}
+	switch(op[index]){
+		case '^': return 3;
+		case '*':
+		case '/':
+		case '%': return 2;
+		case '+':
+		case '-': return 1;
+		case ')':
+		case '(': return 0;
+		default: return -1;
+	}
+}
+
+bool Bares::precedence(std::string op1, std::string op2){
+	int cast1 = getPrecedence(op1);
+	int cast2 = getPrecedence(op2);
+
+	if(cast1 > cast2){
+		return true;
+	}else if(cast1 < cast2){
+		return false;
+	}else{
+		return true;
+	}
+}
+
+std::vector<Token> Bares::convert(){
+	std::vector<Token> posf;
+	std::stack<Token> c;
+
+	for(auto i : m_tk_list){
+		if(isNumber(i.type)){
+			posf.emplace_back(i);
+		}else if(openScope(i.type)){
+			c.push(i);
+		}else if(closeScope(i.type)){
+			while(!openScope(c.top().type)){
+				posf.emplace_back(c.top());
+				c.pop();
+			}
+			c.pop();
+		}else if(isOperator(i.type)){
+			while(!c.empty() && precedence(c.top().value, i.value)){
+				posf.emplace_back(c.top() );
+				c.pop();
+			}
+			c.push(i);
+		}
+	}
+
+	while(!c.empty()){
+		posf.emplace_back(c.top());
+		c.pop();
+	}
+	swap(m_tk_list, posf);
+
+	return m_tk_list;
+}
+
+int Bares::calculate(int number1, int number2, int *error, std::string c){
+	*error = 0;
+	switch(c[0]){
+		case '^': return pow(number1, number2);
+		case '*': return number1*number2;
+		case '/':{
+					if(number2 == 0){
+						*error = 1;
+						return 0;
+					}else{
+						return number1/number2;
+					}
+				}
+		case '%':{
+					if(number2 == 0){
+						*error = 1;
+						return 0;
+					}else{
+						return number1%number2;
+					}
+				}
+		case '+': return number2+number1;
+		case '-': return number1-number2;
+		default: std::cout <<"undefined operator";
+
+	}
+	return 0;
+}
+
+int Bares::inspect(int *error){
+	std::stack<int> c;
+	*error = 0;
+	for(auto i : m_tk_list){
+		if(isNumber(i.type)){
+			c.push(stoll(i.value));
+		}else if(isOperator(i.type)){
+			auto op2 = c.top();
+			c.pop();
+			auto op1 = c.top();
+			c.pop();
+			auto value = calculate(op1, op2, error, i.value);
+			c.push(value);
+		}else{
+			std::cout << "error";
+		}
+	}
+
+	if(c.top() < -32768 || c.top() > 32768){
+		*error = 2;
+		return 0;
+	}
+
+	return c.top();
+
 }

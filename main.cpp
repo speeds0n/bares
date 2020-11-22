@@ -1,3 +1,9 @@
+/*!
+ * \file main.cpp
+ * \author Edson Cassiano
+ * \date November, 2020
+ */
+
 #include <iostream>
 #include <string>
 #include <iomanip>
@@ -15,55 +21,69 @@ void print_error_msg( const Parser::ResultType & result, std::string str )
     switch ( result.type )
     {
         case Parser::ResultType::UNEXPECTED_END_OF_EXPRESSION:
-            std::cout << ">>> Unexpected end of input at column (" << result.at_col << ")!\n";
+            std::cout << "Unexpected end of input at column (" << result.at_col+1 << ")!\n";
             break;
         case Parser::ResultType::ILL_FORMED_INTEGER:
-            std::cout << ">>> Ill formed integer at column (" << result.at_col << ")!\n";
+            std::cout << "Ill formed integer at column (" << result.at_col+1 << ")!\n";
             break;
         case Parser::ResultType::MISSING_TERM:
-            std::cout << ">>> Missing <term> at column (" << result.at_col << ")!\n";
+            std::cout << "Missing <term> at column (" << result.at_col+1 << ")!\n";
             break;
         case Parser::ResultType::EXTRANEOUS_SYMBOL:
-            std::cout << ">>> Extraneous symbol after valid expression found at column (" << result.at_col << ")!\n";
+            std::cout << "Extraneous symbol after valid expression found at column (" << result.at_col+1 << ")!\n";
             break;
         case Parser::ResultType::INTEGER_OUT_OF_RANGE:
-            std::cout << ">>> Integer constant out of range beginning at column (" << result.at_col << ")!\n";
+            std::cout << "Integer constant out of range beginning at column (" << result.at_col+1 << ")!\n";
+			break;
+		case Parser::ResultType::INCOMPLETE_EXPRE:
+			std::cout << "Unexprected end of expression at column (" << result.at_col+1 << ")!\n";
+			break;
+		case Parser::ResultType::MISS_CLOSE_SCOPE:
+			std::cout << "Missing closing \")\" at column (" << result.at_col+1 <<")!\n";
             break;
+		case Parser::ResultType::DIV_BY_ZERO:
+			std::cout << "Division by zero!\n"; 
+			break;
+		case Parser::ResultType::OUT_RANGE:
+			std::cout << "Numeric overflow error!\n";
+			break;
         default:
             std::cout << ">>> Unhandled error found!\n";
             break;
     }
 
-    std::cout << "\"" << str << "\"\n";
-    std::cout << " " << error_indicator << std::endl;
+//    std::cout << "\"" << str << "\"\n";
+//    std::cout << " " << error_indicator << std::endl;
 }
 
 int main(){
 
 	Parser my_parser;
 	Bares r;
+	int error{0};
 
 	std::string expression;
 
-	getline(std::cin, expression);
+	while( getline(std::cin, expression) ){
 
-	
-	auto result = my_parser.parse(expression);
-	if(result.type != Parser::ResultType::OK){
-		print_error_msg( result, expression);
-	}else{
-		// IMPLEMENTAR AQUI PRE FIXO POS FIXO
-	}
+		auto result = my_parser.parse(expression);
 
-	auto lista = my_parser.get_tokens();
-	std::cout << ">>> Token: {";
-	std::copy( lista.begin(), lista.end(), std::ostream_iterator< Token >(std::cout, " ") );
-	std::cout << "}\n";
+		r.setTkList(my_parser.get_tokens() );
 
-	int g{0};
-	while(g < lista.size()){
-		std::cout << lista[g].value << std::endl;
-		g++;
+		if(result.type != Parser::ResultType::OK){
+			print_error_msg( result, expression);
+		}else{
+			auto list = my_parser.get_tokens();
+			list = r.convert();
+			auto rCal = r.inspect(&error);
+			if(error == 1){
+				std::cout << "Division by zero!\n";
+			}else if(error == 2){
+				std::cout << "Numeric overflow error!\n";
+			}else{
+				std::cout << rCal << std::endl;
+			}
+		}
 	}
 
 	return 0;
