@@ -27,7 +27,8 @@ If you run the program using `./a.out`, you will need type an expression, after 
 | Potentiation | `^` |
 | Rest of Division | `%` |
 
-You can use the "(" ")" in expressions, the program ignores spaces and tab, but you can't to separate numbers. Ex: `2 0 + 4` is invalid expression, but `20 + 4` is valid.
+You can use the "(" ")" in expressions, the program ignores spaces and tab, but you can't to separate numbers.
+Example: `2 0 + 4` is invalid expression, but `20 + 4` is valid.
 
 #### Example Expressions
 ```
